@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>토익 스피킹 150점 필수 단어장 (Voice & Examples)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F9F8F6;
+            color: #44403C;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 160px;
+        }
+
+        .hide-content {
+            background-color: #E7E5E4;
+            color: transparent !important;
+            user-select: none;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .hide-content:active {
+            background-color: #D6D3D1;
+            color: inherit !important;
+        }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(12px);
+            background-color: rgba(249, 248, 246, 0.9);
+        }
+
+        .card-active {
+            border-color: #10B981;
+            background-color: #F0FDF4;
+        }
+
+        /* Mobile Scroll Optimization */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #D6D3D1; border-radius: 10px; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; padding: 0; }
+            .card { 
+                border: 1px solid #E5E7EB; 
+                break-inside: avoid; 
+                margin-bottom: 1.5rem; 
+                padding: 1rem;
+                border-radius: 8px;
+            }
+            .hide-content { color: inherit !important; background: transparent !important; }
+            .progress-bar-container { display: none; }
+        }
+    </style>
+</head>
+<body class="pb-24">
+
+<!-- Chosen Palette: Warm Professional (Stone, Emerald for progress, Amber for accents) -->
+<!-- Application Structure Plan: 모바일 웹 앱 형태의 단어장으로, 상단에 학습 진척도를 보여주는 대시보드를 배치하고 하단에 카드형 단어 리스트를 구성했습니다. 사용자가 API 키 설정 없이도 즉시 발음을 들을 수 있도록 브라우저 내장 TTS 기능을 활용합니다. 각 카드는 토익 스피킹의 핵심인 '예제 문장'을 포함하며, 자가 테스트를 위해 내용을 가릴 수 있는 인터랙션을 제공합니다. -->
+<!-- Visualization & Content Choices: 60여 개의 엄선된 토스 빈출 동사 데이터셋 구축 -> Chart.js를 이용한 실시간 진도율 시각화 -> Web Speech API를 통한 음성 지원 -> 모바일 터치 대응 레이아웃. 모든 요소는 토익 스피킹 150점 수준에 맞춘 비즈니스 상황 문장들로 채워졌습니다. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Header & Progress -->
+    <header class="sticky-header border-b border-stone-200 px-4 py-4 no-print">
+        <div class="max-w-md mx-auto">
+            <div class="flex items-center justify-between mb-3">
+                <h1 class="text-xl font-bold text-stone-800">토스 150점 정복 🚀</h1>
+                <div class="flex gap-2">
+                    <button onclick="window.print()" class="w-10 h-10 flex items-center justify-center bg-stone-100 rounded-full text-stone-600 hover:bg-stone-200 transition">
+                        <span>🖨️</span>
+                    </button>
+                    <button onclick="toggleTestMode()" id="test-mode-btn" class="w-10 h-10 flex items-center justify-center bg-stone-100 rounded-full text-stone-600 transition">
+                        <span id="test-icon">👁️</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4 bg-white p-3 rounded-2xl shadow-sm border border-stone-100">
+                <div class="chart-container" style="width: 80px; height: 80px;">
+                    <canvas id="progressChart"></canvas>
+                </div>
+                <div class="flex-1">
+                    <p id="progress-text" class="text-sm font-bold text-stone-700">진행률: 0%</p>
+                    <p class="text-[11px] text-stone-400 leading-tight">60개의 필수 동사를 마스터하여 고득점을 달성하세요.</p>
+                    <div class="mt-2 h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                        <div id="progress-bar-fill" class="h-full bg-emerald-500 transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6">
+        
+        <!-- Filter Tabs -->
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-2 no-print">
+            <button onclick="setFilter('all')" data-filter="all" class="filter-btn active px-4 py-2 rounded-xl bg-stone-800 text-white text-xs font-bold shadow-md transition">전체</button>
+            <button onclick="setFilter('irregular')" data-filter="irregular" class="filter-btn px-4 py-2 rounded-xl bg-white text-stone-500 text-xs font-bold border border-stone-200 transition">불규칙</button>
+            <button onclick="setFilter('business')" data-filter="business" class="filter-btn px-4 py-2 rounded-xl bg-white text-stone-500 text-xs font-bold border border-stone-200 transition">비즈니스</button>
+            <button onclick="setFilter('part2')" data-filter="part2" class="filter-btn px-4 py-2 rounded-xl bg-white text-stone-500 text-xs font-bold border border-stone-200 transition">Part 2 전용</button>
+        </div>
+
+        <!-- Word Cards -->
+        <div id="word-container" class="space-y-4">
+            <!-- Dynamic Injection -->
+        </div>
+
+    </main>
+
+    <!-- Bottom Action Bar -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-stone-200 px-6 py-4 flex justify-around items-center no-print shadow-lg">
+        <button onclick="scrollToTop()" class="flex flex-col items-center gap-1 group">
+            <span class="text-xl group-hover:scale-110 transition">🏠</span>
+            <span class="text-[10px] font-bold text-stone-400 group-hover:text-stone-800">홈</span>
+        </button>
+        <button onclick="filterUnmemorized()" class="flex flex-col items-center gap-1 group">
+            <span class="text-xl group-hover:scale-110 transition">🎯</span>
+            <span class="text-[10px] font-bold text-stone-400 group-hover:text-stone-800">미암기</span>
+        </button>
+        <button onclick="resetAll()" class="flex flex-col items-center gap-1 group">
+            <span class="text-xl group-hover:scale-110 transition">🔄</span>
+            <span class="text-[10px] font-bold text-stone-400 group-hover:text-stone-800">초기화</span>
+        </button>
+    </div>
+
+    <script>
+        // Vocabulary Data (외부 JSON에서 로드)
+        let vocabData = [];
+
+        let currentFilter = 'all';
+        let isTestMode = false;
+        let chartInstance = null;
+
+        async function loadVocabData() {
+            try {
+                const response = await fetch('vocabData.json');
+                if (!response.ok) {
+                    throw new Error('단어 데이터를 불러오지 못했습니다.');
+                }
+                const data = await response.json();
+                // memorized 필드가 없더라도 안전하게 기본값 설정
+                vocabData = data.map(item => ({
+                    memorized: false,
+                    ...item,
+                    memorized: item.memorized ?? false
+                }));
+            } catch (error) {
+                console.error(error);
+                alert('단어 데이터를 불러오는 중 오류가 발생했습니다.');
+            }
+        }
+
+        // Initialize
+        async function init() {
+            await loadVocabData();
+            renderWords();
+            initChart();
+            updateProgress();
+        }
+
+        // Render Words to UI
+        function renderWords() {
+            const container = document.getElementById('word-container');
+            container.innerHTML = '';
+
+            const filtered = vocabData.filter(item => {
+                if (currentFilter === 'all') return true;
+                if (currentFilter === 'unmemorized') return !item.memorized;
+                if (currentFilter === 'irregular') return item.type === 'irregular';
+                if (currentFilter === 'business') return item.category === 'business';
+                if (currentFilter === 'part2') return item.category === 'part2';
+                return true;
+            });
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `card bg-white p-5 rounded-3xl shadow-sm border transition-all duration-300 ${item.memorized ? 'card-active' : 'border-stone-200'}`;
+                
+                const hideClass = isTestMode ? 'hide-content' : '';
+
+                card.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <div class="no-print">
+                            <input type="checkbox" ${item.memorized ? 'checked' : ''} onchange="toggleWord(${item.id})" class="w-6 h-6 rounded-xl text-emerald-500 border-stone-300 focus:ring-emerald-500 cursor-pointer">
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-xl font-bold text-stone-800">${item.base}</h3>
+                                <button onclick="speakText('${item.base}, ${item.past}, ${item.pp}')" class="text-stone-300 hover:text-stone-600 no-print">🔊</button>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2 mb-3">
+                                <div class="bg-stone-50 p-2 rounded-xl">
+                                    <p class="text-[9px] uppercase font-bold text-stone-400 mb-1">Past</p>
+                                    <p class="text-sm font-semibold text-stone-600">${item.past}</p>
+                                </div>
+                                <div class="bg-stone-50 p-2 rounded-xl">
+                                    <p class="text-[9px] uppercase font-bold text-stone-400 mb-1">P.P (분사)</p>
+                                    <p class="text-sm font-bold text-emerald-700 ${hideClass}" onclick="this.classList.remove('hide-content')">${item.pp}</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 border-t border-stone-100 pt-3">
+                                <p class="text-sm font-bold text-stone-700 ${hideClass}" onclick="this.classList.remove('hide-content')">${item.meaning}</p>
+                                <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-100/50">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-[9px] font-bold text-amber-600 uppercase">Example Sentence</span>
+                                        <button onclick="speakText('${item.ex}')" class="text-amber-300 hover:text-amber-600 no-print text-xs">🔊 듣기</button>
+                                    </div>
+                                    <p class="text-xs text-stone-600 italic leading-relaxed">${item.ex}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Voice Feature (Web Speech API) - No Key Needed
+        function speakText(text) {
+            if (!window.speechSynthesis) {
+                alert("이 브라우저는 음성 합성을 지원하지 않습니다.");
+                return;
+            }
+            window.speechSynthesis.cancel(); // Stop current speech
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9; // Slightly slower for clarity
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Business Logic
+        function toggleWord(id) {
+            const item = vocabData.find(v => v.id === id);
+            if (item) {
+                item.memorized = !item.memorized;
+                updateProgress();
+                updateChart();
+                renderWords();
+            }
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.filter === filter) {
+                    btn.classList.add('bg-stone-800', 'text-white', 'shadow-md');
+                    btn.classList.remove('bg-white', 'text-stone-500');
+                } else {
+                    btn.classList.remove('bg-stone-800', 'text-white', 'shadow-md');
+                    btn.classList.add('bg-white', 'text-stone-500');
+                }
+            });
+            renderWords();
+        }
+
+        function filterUnmemorized() {
+            currentFilter = currentFilter === 'unmemorized' ? 'all' : 'unmemorized';
+            renderWords();
+        }
+
+        function toggleTestMode() {
+            isTestMode = !isTestMode;
+            const btn = document.getElementById('test-mode-btn');
+            const icon = document.getElementById('test-icon');
+            if (isTestMode) {
+                btn.classList.add('bg-amber-500', 'text-white');
+                icon.innerText = '🙈';
+            } else {
+                btn.classList.remove('bg-amber-500', 'text-white');
+                icon.innerText = '👁️';
+            }
+            renderWords();
+        }
+
+        function updateProgress() {
+            const total = vocabData.length;
+            const done = vocabData.filter(v => v.memorized).length;
+            const percent = Math.round((done / total) * 100);
+            document.getElementById('progress-text').innerText = `진행률: ${percent}% (${done}/${total})`;
+            document.getElementById('progress-bar-fill').style.width = `${percent}%`;
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [0, vocabData.length],
+                        backgroundColor: ['#10B981', '#F5F5F4'],
+                        borderWidth: 0,
+                        cutout: '85%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    animation: { duration: 800 }
+                }
+            });
+            updateChart();
+        }
+
+        function updateChart() {
+            if (chartInstance) {
+                const done = vocabData.filter(v => v.memorized).length;
+                const left = vocabData.length - done;
+                chartInstance.data.datasets[0].data = [done, left];
+                chartInstance.update();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('모든 학습 진도를 초기화하시겠습니까?')) {
+                vocabData.forEach(v => v.memorized = false);
+                updateProgress();
+                updateChart();
+                renderWords();
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
